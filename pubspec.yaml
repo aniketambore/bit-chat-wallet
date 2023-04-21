@@ -14,6 +14,7 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   qr_flutter: ^4.0.0
   equatable: ^2.0.5
+  nostr_tools: ^1.0.7
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:bit_chat_wallet/bdk_api/bdk_api.dart';
+import 'package:bit_chat_wallet/nostr_api/nostr_api.dart';
 import 'package:bit_chat_wallet/splashscreen.dart';
 import 'package:bit_chat_wallet/wallet_repository/wallet_repository.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,10 @@ class BitChatWalletApp extends StatefulWidget {
 }
 
 class _BitChatWalletAppState extends State<BitChatWalletApp> {
-  final WalletRepository _walletRepository = WalletRepository(bdkApi: BDKApi());
+  final WalletRepository _walletRepository = WalletRepository(
+    bdkApi: BDKApi(),
+    nostrApi: NostrApi(),
+  );
 
   @override
   Widget build(BuildContext context) {

@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.10.0"
+  base58check:
+    dependency: transitive
+    description:
+      name: base58check
+      sha256: "6c300dfc33e598d2fe26319e13f6243fea81eaf8204cb4c6b69ef20a625319a5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   bdk_flutter:
     dependency: "direct main"
     description:
@@ -49,6 +57,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.27.2"
+  bech32:
+    dependency: transitive
+    description:
+      name: bech32
+      sha256: "156cbace936f7720c79a79d16a03efad343b1ef17106716e04b8b8e39f99f7f7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
+  bip32:
+    dependency: transitive
+    description:
+      name: bip32
+      sha256: "54787cd7a111e9d37394aabbf53d1fc5e2e0e0af2cd01c459147a97c0e3f8a97"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  bip340:
+    dependency: transitive
+    description:
+      name: bip340
+      sha256: "9a2f454d3f5e2d67a1b21494203132786d95bde8784e7ada74adac00df3ddc11"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
+  bip39:
+    dependency: transitive
+    description:
+      name: bip39
+      sha256: de1ee27ebe7d96b84bb3a04a4132a0a3007dcdd5ad27dd14aa87a29d97c45edc
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.6"
   bloc:
     dependency: transitive
     description:
@@ -65,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  bs58check:
+    dependency: transitive
+    description:
+      name: bs58check
+      sha256: c4a164d42b25c2f6bc88a8beccb9fc7d01440f3c60ba23663a20a70faf484ea9
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   build:
     dependency: transitive
     description:
@@ -328,6 +376,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  hex:
+    dependency: transitive
+    description:
+      name: hex
+      sha256: "4e7cd54e4b59ba026432a6be2dd9d96e4c5205725194997193bf871703b82c4a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   http:
     dependency: transitive
     description:
@@ -360,6 +416,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.0"
+  kepler:
+    dependency: transitive
+    description:
+      name: kepler
+      sha256: "8cf9f7df525bd4e5b192d91e52f1c75832b1fefb27fb4f4a09b1412b0f4f23d0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3"
   lints:
     dependency: transitive
     description:
@@ -424,6 +488,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  nostr_tools:
+    dependency: "direct main"
+    description:
+      name: nostr_tools
+      sha256: "5536c4017419bcef7777f44f61884a22f864a7a937a3b10254e889ed284757d3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
   package_config:
     dependency: transitive
     description:
