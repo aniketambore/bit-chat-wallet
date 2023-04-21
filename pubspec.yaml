@@ -13,6 +13,7 @@ dependencies:
   flutter_bloc: ^8.1.2
   flutter_secure_storage: ^8.0.0
   qr_flutter: ^4.0.0
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
