@@ -1,5 +1,6 @@
 import 'package:bit_chat_wallet/features/home/src/home_cubit.dart';
 import 'package:bit_chat_wallet/features/receive_dialog/receive_dialog.dart';
+import 'package:bit_chat_wallet/features/send_dialog/send_dialog.dart';
 import 'package:bit_chat_wallet/wallet_repository/wallet_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -170,7 +171,11 @@ class _BtcWidgetContainerState extends State<_BtcWidgetContainer> {
             children: [
               IconButton(
                 onPressed: () {
-                  // TODO: Sending BTC
+                  showDialog(
+                      context: context,
+                      builder: (context) => SendBTCDialog(
+                            walletRepository: widget.walletRepository,
+                          ));
                 },
                 icon: const Icon(Icons.call_made),
                 color: Colors.grey[600],
