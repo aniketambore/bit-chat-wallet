@@ -1,4 +1,5 @@
 import 'package:bit_chat_wallet/bdk_api/bdk_api.dart';
+import 'package:bit_chat_wallet/contacts_storage/contacts_storage.dart';
 import 'package:bit_chat_wallet/nostr_api/nostr_api.dart';
 import 'package:bit_chat_wallet/splashscreen.dart';
 import 'package:bit_chat_wallet/wallet_repository/wallet_repository.dart';
@@ -19,6 +20,7 @@ class _BitChatWalletAppState extends State<BitChatWalletApp> {
   final WalletRepository _walletRepository = WalletRepository(
     bdkApi: BDKApi(),
     nostrApi: NostrApi(),
+    contactStorage: ContactStorage(),
   );
 
   @override
