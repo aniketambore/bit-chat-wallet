@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:bit_chat_wallet/features/chat_screen/src/chat_screen_cubit.dart';
+import 'package:bit_chat_wallet/features/chat_screen/src/message_bubble.dart';
 import 'package:bit_chat_wallet/wallet_repository/wallet_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,6 +30,7 @@ class ChatScreen extends StatelessWidget {
       child: ChatScreenView(
         receiverName: receiverName,
         receiverPubKey: receiverPubKey,
+        walletRepository: walletRepository,
       ),
     );
   }
@@ -39,9 +41,11 @@ class ChatScreenView extends StatefulWidget {
     super.key,
     required this.receiverName,
     required this.receiverPubKey,
+    required this.walletRepository,
   });
   final String receiverName;
   final String receiverPubKey;
+  final WalletRepository walletRepository;
 
   @override
   State<ChatScreenView> createState() => _ChatScreenViewState();
@@ -90,6 +94,7 @@ class _ChatScreenViewState extends State<ChatScreenView> {
                   receiverPubKey: widget.receiverPubKey,
                   myPrivKey: state.myPrivKey,
                   myPubKey: state.myPubKey,
+                  walletRepository: widget.walletRepository,
                 )
               : const Center(
                   child: CircularProgressIndicator(),
@@ -106,11 +111,13 @@ class _ChatScreenContainer extends StatefulWidget {
     required this.receiverPubKey,
     required this.myPrivKey,
     required this.myPubKey,
+    required this.walletRepository,
   });
   final String receiverName;
   final String receiverPubKey;
   final String myPubKey;
   final String myPrivKey;
+  final WalletRepository walletRepository;
 
   @override
   State<_ChatScreenContainer> createState() => __ChatScreenContainerState();
@@ -206,7 +213,13 @@ class __ChatScreenContainerState extends State<_ChatScreenContainer> {
             controller: scrollController,
             itemCount: messages.length,
             itemBuilder: (context, index) {
-              return Container();
+              final message = messages.elementAt(index);
+              return MessageBubble(
+                message: message.text,
+                isMe: message.isMe,
+                createdAt: message.createdAt,
+                walletRepository: widget.walletRepository,
+              );
             },
           ),
         ),
@@ -240,7 +253,7 @@ class __ChatScreenContainerState extends State<_ChatScreenContainer> {
                     onPressed: () {
                       final messageToSend = mssgController.text.trim();
                       if (messageToSend.isNotEmpty) {
-                        // TODO: Publish Message to Relays
+                        publishMessage(messageToSend);
                         mssgController.clear();
                       }
                     },
@@ -254,6 +267,34 @@ class __ChatScreenContainerState extends State<_ChatScreenContainer> {
         const SizedBox(height: 8),
       ],
     );
+  }
+
+  void publishMessage(String messageToSend) {
+    final encryptedMessage = nip04.encrypt(
+      widget.myPrivKey,
+      widget.receiverPubKey,
+      messageToSend,
+    );
+    final event = eventApi.finishEvent(
+      Event(
+          kind: 4,
+          tags: [
+            ['p', widget.receiverPubKey]
+          ],
+          content: encryptedMessage,
+          created_at: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          pubkey: widget.myPubKey),
+      widget.myPrivKey,
+    );
+    if (eventApi.verifySignature(event)) {
+      try {
+        _relay.publish(event);
+      } catch (_) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Something went wrong!'),
+        ));
+      }
+    }
   }
 }
 
