@@ -14,15 +14,18 @@ class HomeInProgress extends HomeState {
 class HomeSuccess extends HomeState {
   const HomeSuccess({
     required this.balance,
+    required this.contactsList,
     this.syncStatus = SyncStatus.success,
   });
 
   final Balance balance;
+  final List<ContactCM> contactsList;
   final SyncStatus syncStatus;
 
   @override
   List<Object?> get props => [
         balance,
+        contactsList,
         syncStatus,
       ];
 }

@@ -35,6 +35,7 @@ class _HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<HomeCubit>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('BitChat Wallet'),
@@ -70,7 +71,15 @@ class _HomeView extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Showing contacts Dialog
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AddContactDialog(
+                addContact: (id, name, npub) =>
+                    cubit.addContactSubmit(id, name, npub),
+              );
+            },
+          );
         },
         child: const Icon(
           Icons.contacts_outlined,
@@ -218,6 +227,78 @@ class _BtcWidgetContainerState extends State<_BtcWidgetContainer> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AddContactDialog extends StatelessWidget {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController userNpubController = TextEditingController();
+  final Future<void> Function(String id, String name, String npub) addContact;
+
+  AddContactDialog({super.key, required this.addContact});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        constraints: const BoxConstraints(maxWidth: 600),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Add Contact',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: userNpubController,
+              decoration: const InputDecoration(
+                labelText: 'User npub',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close dialog
+                  },
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    String username = usernameController.text;
+                    String npub = userNpubController.text;
+                    addContact(npub, username, npub);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
