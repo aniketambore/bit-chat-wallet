@@ -39,7 +39,7 @@ class CreateWalletView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/chat.png', width: 150),
+            Image.asset('assets/bitcoin-symbol.png', width: 150),
             const SizedBox(height: 16),
             const Text(
               'Bit Chat Wallet',

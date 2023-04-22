@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:bit_chat_wallet/features/chat_screen/src/chat_screen_cubit.dart';
 import 'package:bit_chat_wallet/features/chat_screen/src/message_bubble.dart';
+import 'package:bit_chat_wallet/features/request_btc_dialog/request_btc_dialog.dart';
 import 'package:bit_chat_wallet/wallet_repository/wallet_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -204,6 +205,7 @@ class __ChatScreenContainerState extends State<_ChatScreenContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<ChatScreenCubit>();
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -245,7 +247,21 @@ class __ChatScreenContainerState extends State<_ChatScreenContainer> {
                 children: [
                   IconButton(
                     onPressed: () async {
-                      // TODO: Request BTC Dialog
+                      final result = await showDialog(
+                        context: context,
+                        builder: (_) => const RequestBitcoinDialog(),
+                      );
+                      if (result != null) {
+                        final String requestAmount = result['requestAmount'];
+                        final String requestMessage = result['requestMessage'];
+                        if (requestAmount.isNotEmpty &&
+                            requestMessage.isNotEmpty) {
+                          final receiveAddress = await cubit.getAddress();
+                          final messageToSend =
+                              '{"amount": $requestAmount,"message": "$requestMessage","address": "$receiveAddress"}';
+                          publishMessage(messageToSend);
+                        }
+                      }
                     },
                     icon: const Icon(Icons.currency_bitcoin_outlined),
                   ),
