@@ -1,5 +1,6 @@
 import 'package:bit_chat_wallet/contacts_storage/contacts_storage.dart';
 import 'package:bit_chat_wallet/converter/converter.dart';
+import 'package:bit_chat_wallet/features/chat_screen/chat_screen.dart';
 import 'package:bit_chat_wallet/features/home/src/home_cubit.dart';
 import 'package:bit_chat_wallet/features/receive_dialog/receive_dialog.dart';
 import 'package:bit_chat_wallet/features/secrets/secrets.dart';
@@ -319,7 +320,18 @@ class ChatListTile extends StatelessWidget {
         style: const TextStyle(fontSize: 14),
       ),
       onTap: () {
-        // TODO: Navigating to ChatScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              walletRepository: walletRepository,
+              receiverName: username,
+              receiverPubKey: receiverPubKey,
+              myPrivKey: myNostPrivKey,
+            ),
+            fullscreenDialog: true,
+          ),
+        );
       },
     );
   }
