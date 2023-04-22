@@ -1,7 +1,10 @@
+import 'dart:collection';
+
 import 'package:bit_chat_wallet/features/chat_screen/src/chat_screen_cubit.dart';
 import 'package:bit_chat_wallet/wallet_repository/wallet_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nostr_tools/nostr_tools.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({
@@ -115,8 +118,82 @@ class _ChatScreenContainer extends StatefulWidget {
 
 class __ChatScreenContainerState extends State<_ChatScreenContainer> {
   final mssgController = TextEditingController();
-  final List<Message> messages = [];
+  final Queue<Message> messages = Queue();
   final ScrollController scrollController = ScrollController();
+  final _relay = RelayApi(relayUrl: 'wss://nos.lol');
+  late Stream<Event> _stream;
+  final nip04 = Nip04();
+  final eventApi = EventApi();
+
+  get _scrollController => scrollController.animateTo(
+        scrollController.position.minScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    _initStream();
+  }
+
+  @override
+  void dispose() {
+    _relay.close();
+    super.dispose();
+  }
+
+  Future<Stream<Event>> _connectToRelay() async {
+    final stream = await _relay.connect();
+
+    _relay.sub([
+      Filter(
+        kinds: [4],
+        authors: [widget.myPubKey],
+        p: [widget.receiverPubKey],
+        limit: 100,
+      ),
+      Filter(
+        kinds: [4],
+        authors: [widget.receiverPubKey],
+        p: [widget.myPubKey],
+        limit: 100,
+      )
+    ]);
+
+    return stream
+        .where((message) => message.type == 'EVENT')
+        .map((message) => message.message);
+  }
+
+  void _initStream() async {
+    _stream = await _connectToRelay();
+    _stream.listen((message) {
+      final event = message;
+      if (event.kind == 4) {
+        final decryptedMessage = nip04.decrypt(
+          widget.myPrivKey,
+          widget.receiverPubKey,
+          event.content,
+        );
+        print(decryptedMessage);
+        final message = Message(
+          time: DateTime.now(),
+          text: decryptedMessage,
+          isMe: event.pubkey == widget.myPubKey,
+          createdAt: event.created_at,
+        );
+        updateMessagesQueue(message);
+      }
+    });
+  }
+
+  void updateMessagesQueue(Message message) {
+    setState(() {
+      messages.addFirst(message);
+    });
+    _scrollController;
+  }
 
   @override
   Widget build(BuildContext context) {
