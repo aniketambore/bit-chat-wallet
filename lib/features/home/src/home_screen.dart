@@ -1,3 +1,4 @@
+import 'package:bit_chat_wallet/contacts_storage/contacts_storage.dart';
 import 'package:bit_chat_wallet/features/home/src/home_cubit.dart';
 import 'package:bit_chat_wallet/features/receive_dialog/receive_dialog.dart';
 import 'package:bit_chat_wallet/features/secrets/secrets.dart';
@@ -20,15 +21,16 @@ class HomeScreen extends StatelessWidget {
       create: (_) => HomeCubit(
         walletRepository: walletRepository,
       ),
-      child: _HomeView(
+      child: HomeView(
         walletRepository: walletRepository,
       ),
     );
   }
 }
 
-class _HomeView extends StatelessWidget {
-  const _HomeView({
+class HomeView extends StatelessWidget {
+  const HomeView({
+    super.key,
     required this.walletRepository,
   });
   final WalletRepository walletRepository;
@@ -54,20 +56,47 @@ class _HomeView extends StatelessWidget {
             );
           },
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                walletRepository.clearCache();
+              },
+              icon: const Icon(Icons.delete)),
+        ],
       ),
-      body: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              BtcWidget(
-                amount: 0.5,
-                walletRepository: walletRepository,
-              ),
-              // TODO: Some Chat kind of UI
-            ],
-          ),
-        ),
+      body: BlocConsumer<HomeCubit, HomeState>(
+        listenWhen: (oldState, newState) =>
+            oldState is HomeSuccess && newState is HomeSuccess
+                ? oldState.syncStatus != newState.syncStatus
+                : false,
+        listener: (context, state) {
+          if (state is HomeSuccess) {
+            final hasSubmissionError = state.syncStatus == SyncStatus.error;
+
+            if (hasSubmissionError) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  const SnackBar(
+                    content: Text('Something went wrong!'),
+                  ),
+                );
+            }
+          }
+        },
+        builder: (context, state) {
+          return state is HomeSuccess
+              ? _HomeContainer(
+                  walletRepository: walletRepository,
+                  amount: state.balance.total,
+                  syncStatus: state.syncStatus,
+                  contactsList: state.contactsList,
+                  myNostPrivKey: state.nostrPrivKey,
+                )
+              : const Center(
+                  child: CircularProgressIndicator(),
+                );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -89,54 +118,76 @@ class _HomeView extends StatelessWidget {
   }
 }
 
-class BtcWidget extends StatefulWidget {
-  final double amount;
-  final WalletRepository walletRepository;
-
-  const BtcWidget({
-    super.key,
+class _HomeContainer extends StatelessWidget {
+  const _HomeContainer({
     required this.amount,
     required this.walletRepository,
+    required this.syncStatus,
+    required this.contactsList,
+    required this.myNostPrivKey,
   });
 
-  @override
-  State<BtcWidget> createState() => _BtcWidgetState();
-}
+  final int amount;
+  final WalletRepository walletRepository;
+  final SyncStatus syncStatus;
+  final List<ContactCM> contactsList;
+  final String myNostPrivKey;
 
-class _BtcWidgetState extends State<BtcWidget> {
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<HomeCubit, HomeState>(
-      listenWhen: (oldState, newState) =>
-          oldState is HomeSuccess && newState is HomeSuccess
-              ? oldState.syncStatus != newState.syncStatus
-              : false,
-      listener: (context, state) {
-        if (state is HomeSuccess) {
-          final hasSubmissionError = state.syncStatus == SyncStatus.error;
-
-          if (hasSubmissionError) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                const SnackBar(
-                  content: Text('Something went wrong!'),
-                ),
-              );
-          }
-        }
-      },
-      builder: (context, state) {
-        return state is HomeSuccess
-            ? _BtcWidgetContainer(
-                amount: state.balance.total,
-                walletRepository: widget.walletRepository,
-                syncStatus: state.syncStatus,
-              )
-            : const Center(
-                child: CircularProgressIndicator(),
-              );
-      },
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _BtcWidgetContainer(
+            amount: amount,
+            walletRepository: walletRepository,
+            syncStatus: syncStatus,
+          ),
+          const SizedBox(height: 26),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Chats',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: contactsList.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No contacts found',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: contactsList.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      return ChatListTile(
+                        username: contactsList[index].name,
+                        receiverNpub: contactsList[index].npub,
+                        walletRepository: walletRepository,
+                        myNostPrivKey: myNostPrivKey,
+                      );
+                    },
+                    separatorBuilder: (_, __) {
+                      return const Divider(
+                        thickness: 2,
+                        color: Colors.black54,
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -228,6 +279,47 @@ class _BtcWidgetContainerState extends State<_BtcWidgetContainer> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class ChatListTile extends StatelessWidget {
+  final String username; // User username
+  final String receiverNpub; // User subtitle
+  final WalletRepository walletRepository;
+  final String myNostPrivKey;
+
+  const ChatListTile({
+    super.key,
+    required this.username,
+    required this.receiverNpub,
+    required this.walletRepository,
+    required this.myNostPrivKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<HomeCubit>();
+    final receiverPubKey = cubit.npubToHex(receiverNpub);
+
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(
+            'https://robohash.org/$receiverPubKey?set=set5'), // User avatar image
+        radius: 24,
+        backgroundColor: Colors.indigo,
+      ),
+      title: Text(
+        username,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(
+        receiverNpub,
+        style: const TextStyle(fontSize: 14),
+      ),
+      onTap: () {
+        // TODO: Navigating to ChatScreen
+      },
     );
   }
 }

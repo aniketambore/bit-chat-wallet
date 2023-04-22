@@ -21,10 +21,13 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       final balance = await _walletRepository.getBalance();
       final contactsList = await _walletRepository.allContacts();
+      final mnemonic = await _walletRepository.getWalletMnemonic();
+      final nostrPrivKey = _walletRepository.mnemonicToPrivKey(mnemonic!);
       emit(
         HomeSuccess(
           balance: balance,
           contactsList: contactsList,
+          nostrPrivKey: nostrPrivKey,
           syncStatus: SyncStatus.success,
         ),
       );
@@ -35,6 +38,7 @@ class HomeCubit extends Cubit<HomeState> {
           HomeSuccess(
             balance: lastState.balance,
             contactsList: lastState.contactsList,
+            nostrPrivKey: lastState.nostrPrivKey,
             syncStatus: SyncStatus.error,
           ),
         );
@@ -51,6 +55,7 @@ class HomeCubit extends Cubit<HomeState> {
         HomeSuccess(
           balance: lastState.balance,
           contactsList: lastState.contactsList,
+          nostrPrivKey: lastState.nostrPrivKey,
           syncStatus: SyncStatus.inProgress,
         ),
       );
@@ -69,6 +74,7 @@ class HomeCubit extends Cubit<HomeState> {
           HomeSuccess(
             balance: lastState.balance,
             contactsList: contactsList,
+            nostrPrivKey: lastState.nostrPrivKey,
             syncStatus: SyncStatus.success,
           ),
         );
@@ -77,10 +83,15 @@ class HomeCubit extends Cubit<HomeState> {
           HomeSuccess(
             balance: lastState.balance,
             contactsList: lastState.contactsList,
+            nostrPrivKey: lastState.nostrPrivKey,
             syncStatus: SyncStatus.error,
           ),
         );
       }
     }
+  }
+
+  String npubToHex(String pubKeyNpub) {
+    return _walletRepository.pubKeyNpubToHex(pubKeyNpub);
   }
 }
