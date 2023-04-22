@@ -29,7 +29,7 @@ class _BitChatWalletAppState extends State<BitChatWalletApp> {
       theme: ThemeData(
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.purple,
+          primarySwatch: Colors.indigo,
         ).copyWith(
           background: Colors.white,
         ),
