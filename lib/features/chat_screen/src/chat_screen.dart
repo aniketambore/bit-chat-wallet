@@ -82,8 +82,11 @@ class _ChatScreenViewState extends State<ChatScreenView> {
         },
         builder: (context, state) {
           return state is ChatScreenSuccess
-              ? const Center(
-                  child: Text('Chat Screen'),
+              ? _ChatScreenContainer(
+                  receiverName: widget.receiverName,
+                  receiverPubKey: widget.receiverPubKey,
+                  myPrivKey: state.myPrivKey,
+                  myPubKey: state.myPubKey,
                 )
               : const Center(
                   child: CircularProgressIndicator(),
@@ -92,4 +95,101 @@ class _ChatScreenViewState extends State<ChatScreenView> {
       ),
     );
   }
+}
+
+class _ChatScreenContainer extends StatefulWidget {
+  const _ChatScreenContainer({
+    required this.receiverName,
+    required this.receiverPubKey,
+    required this.myPrivKey,
+    required this.myPubKey,
+  });
+  final String receiverName;
+  final String receiverPubKey;
+  final String myPubKey;
+  final String myPrivKey;
+
+  @override
+  State<_ChatScreenContainer> createState() => __ChatScreenContainerState();
+}
+
+class __ChatScreenContainerState extends State<_ChatScreenContainer> {
+  final mssgController = TextEditingController();
+  final List<Message> messages = [];
+  final ScrollController scrollController = ScrollController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Flexible(
+          child: ListView.builder(
+            reverse: true,
+            controller: scrollController,
+            itemCount: messages.length,
+            itemBuilder: (context, index) {
+              return Container();
+            },
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: mssgController,
+                  decoration: const InputDecoration(
+                    hintText: 'Type your message',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      // TODO: Request BTC Dialog
+                    },
+                    icon: const Icon(Icons.currency_bitcoin_outlined),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      final messageToSend = mssgController.text.trim();
+                      if (messageToSend.isNotEmpty) {
+                        // TODO: Publish Message to Relays
+                        mssgController.clear();
+                      }
+                    },
+                    icon: const Icon(Icons.send),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+class Message {
+  final DateTime time;
+  final String text;
+  final bool isMe;
+  final int createdAt;
+
+  Message({
+    required this.time,
+    required this.text,
+    required this.isMe,
+    required this.createdAt,
+  });
 }
