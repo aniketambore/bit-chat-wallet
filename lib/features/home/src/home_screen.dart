@@ -1,4 +1,5 @@
 import 'package:bit_chat_wallet/contacts_storage/contacts_storage.dart';
+import 'package:bit_chat_wallet/converter/converter.dart';
 import 'package:bit_chat_wallet/features/home/src/home_cubit.dart';
 import 'package:bit_chat_wallet/features/receive_dialog/receive_dialog.dart';
 import 'package:bit_chat_wallet/features/secrets/secrets.dart';
@@ -228,7 +229,7 @@ class _BtcWidgetContainerState extends State<_BtcWidgetContainer> {
               ),
               const SizedBox(width: 8),
               Text(
-                '${widget.amount} BTC',
+                '${widget.amount.toBTC()} BTC',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
