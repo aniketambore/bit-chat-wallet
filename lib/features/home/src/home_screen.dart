@@ -58,13 +58,13 @@ class HomeView extends StatelessWidget {
             );
           },
         ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                walletRepository.clearCache();
-              },
-              icon: const Icon(Icons.delete)),
-        ],
+        // actions: [
+        //   IconButton(
+        //       onPressed: () {
+        //         walletRepository.clearCache();
+        //       },
+        //       icon: const Icon(Icons.delete)),
+        // ],
       ),
       body: BlocConsumer<HomeCubit, HomeState>(
         listenWhen: (oldState, newState) =>
@@ -218,68 +218,71 @@ class _BtcWidgetContainerState extends State<_BtcWidgetContainer> {
       decoration: BoxDecoration(
         color: Colors.grey.withOpacity(0.3),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Image.asset(
-                'assets/bitcoin-symbol.png',
-                width: 38,
-                height: 38,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${widget.amount.toBTC()} BTC',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  'assets/bitcoin-symbol.png',
+                  width: 38,
+                  height: 38,
                 ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  showDialog(
+                const SizedBox(width: 8),
+                Text(
+                  '${widget.amount.toBTC()} BTC',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) => SendBTCDialog(
+                              walletRepository: widget.walletRepository,
+                            ));
+                  },
+                  icon: const Icon(Icons.call_made),
+                  color: Colors.grey[600],
+                  iconSize: 28,
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {
+                    showDialog(
                       context: context,
-                      builder: (context) => SendBTCDialog(
-                            walletRepository: widget.walletRepository,
-                          ));
-                },
-                icon: const Icon(Icons.call_made),
-                color: Colors.grey[600],
-                iconSize: 28,
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => ReceiveAddressDialog(
-                      walletRepository: widget.walletRepository,
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.call_received),
-                color: Colors.grey[600],
-                iconSize: 28,
-              ),
-              const SizedBox(width: 8),
-              widget.syncStatus == SyncStatus.inProgress
-                  ? const Center(child: CircularProgressIndicator())
-                  : IconButton(
-                      onPressed: () {
-                        cubit.refresh();
-                      },
-                      icon: const Icon(Icons.refresh),
-                      color: Colors.grey[600],
-                      iconSize: 28,
-                    ),
-            ],
-          ),
-        ],
+                      builder: (context) => ReceiveAddressDialog(
+                        walletRepository: widget.walletRepository,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.call_received),
+                  color: Colors.grey[600],
+                  iconSize: 28,
+                ),
+                const SizedBox(width: 8),
+                widget.syncStatus == SyncStatus.inProgress
+                    ? const Center(child: CircularProgressIndicator())
+                    : IconButton(
+                        onPressed: () {
+                          cubit.refresh();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        color: Colors.grey[600],
+                        iconSize: 28,
+                      ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -395,7 +398,9 @@ class AddContactDialog extends StatelessWidget {
                   onPressed: () {
                     String username = usernameController.text;
                     String npub = userNpubController.text;
-                    addContact(npub, username, npub);
+                    if (username.trim().isNotEmpty && npub.trim().isNotEmpty) {
+                      addContact(npub, username, npub);
+                    }
                     Navigator.pop(context);
                   },
                   child: const Text('Save'),
