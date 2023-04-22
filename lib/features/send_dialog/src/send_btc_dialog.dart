@@ -8,8 +8,12 @@ class SendBTCDialog extends StatelessWidget {
   const SendBTCDialog({
     super.key,
     required this.walletRepository,
+    this.amountToSend,
+    this.addressToSend,
   });
   final WalletRepository walletRepository;
+  final String? amountToSend;
+  final String? addressToSend;
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +21,22 @@ class SendBTCDialog extends StatelessWidget {
       create: (_) => SendCubit(
         walletRepository: walletRepository,
       ),
-      child: const SendView(),
+      child: SendView(
+        amountToSend: amountToSend,
+        addressToSend: addressToSend,
+      ),
     );
   }
 }
 
 class SendView extends StatelessWidget {
-  const SendView({super.key});
+  const SendView({
+    super.key,
+    this.amountToSend,
+    this.addressToSend,
+  });
+  final String? amountToSend;
+  final String? addressToSend;
 
   @override
   Widget build(BuildContext context) {
@@ -33,16 +46,19 @@ class SendView extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
-              Text(
+            children: [
+              const Text(
                 'Send Bitcoin',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 16),
-              _SendBTCForm(),
+              const SizedBox(height: 16),
+              _SendBTCForm(
+                amountToSend: amountToSend,
+                addressToSend: addressToSend,
+              ),
             ],
           ),
         ),
@@ -52,7 +68,12 @@ class SendView extends StatelessWidget {
 }
 
 class _SendBTCForm extends StatefulWidget {
-  const _SendBTCForm();
+  const _SendBTCForm({
+    this.amountToSend,
+    this.addressToSend,
+  });
+  final String? amountToSend;
+  final String? addressToSend;
 
   @override
   State<_SendBTCForm> createState() => __SendBTCFormState();
@@ -64,6 +85,18 @@ class __SendBTCFormState extends State<_SendBTCForm> {
   final TextEditingController feeRateController = TextEditingController();
 
   bool _isBTCPaidSuccess = false;
+
+  @override
+  void initState() {
+    if (widget.amountToSend != null && widget.addressToSend != null) {
+      setState(() {
+        recipientController.text = widget.addressToSend!;
+        amountController.text = widget.amountToSend!;
+        feeRateController.text = '3';
+      });
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
